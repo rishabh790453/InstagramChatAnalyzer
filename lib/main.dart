@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'File Picker and JSON Parsing Demo',
+      title: 'INSTAGRAM CHAT ANALYZER',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
