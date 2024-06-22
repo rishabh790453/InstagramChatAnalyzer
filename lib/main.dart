@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:sentiment_dart/sentiment_dart.dart';
 
 void main() {
   runApp(MyApp());
@@ -38,6 +39,9 @@ class _MyHomePageState extends State<MyHomePage> {
   double avgtimesuser2 = 0;
   int sumtimesuser1 = 0;
   int sumtimesuser2 = 0;
+
+  double avgSentimentUser1 = 0;
+  double avgSentimentUser2 = 0;
   
   Map<String, int> messageCount = {};
   Map<String, double> averageResponseTime = {};
@@ -55,6 +59,8 @@ class _MyHomePageState extends State<MyHomePage> {
       avgtimesuser2 = 0;
       sumtimesuser1 = 0;
       sumtimesuser2 = 0;
+      avgSentimentUser1 = 0;
+      avgSentimentUser2 = 0;
       messageCount = {};
       averageResponseTime = {};
     });
@@ -74,6 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
         participants = jsonData['participants'];
         messages = processedMessages;
         _calculateMessageCounts();
+        _calculateAverageSentiments();
       });
     }
   }
@@ -137,6 +144,41 @@ class _MyHomePageState extends State<MyHomePage> {
     avgtimesuser2 = (sumtimesuser2 / (totaltimesuser2.length * 60000));
   }
 
+  void _calculateAverageSentiments() {
+    double totalSentimentUser1 = 0;
+    int user1count = 0;
+    double totalSentimentUser2 = 0;
+    int user2count = 0;
+
+    for (var message in participant1Messages) {
+      if (message['content'] != null) {
+        var analysis = Sentiment.analysis(message['content']);
+        if (analysis.score != 0) {
+          totalSentimentUser1 += analysis.score;
+          user1count++;
+        }
+      }
+    }
+
+    for (var message in participant2Messages) {
+      if (message['content'] != null) {
+        var analysis = Sentiment.analysis(message['content']);
+        if (analysis.score != 0) {
+          totalSentimentUser2 += analysis.score;
+          user2count++;
+        }
+      }
+    }
+
+    if (user1count > 0) {
+      avgSentimentUser1 = totalSentimentUser1 / 1;
+    }
+
+    if (user2count > 0) {
+      avgSentimentUser2 = totalSentimentUser2 / 1;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -182,6 +224,23 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 Text(
                   '${participants.isNotEmpty ? participants[1]['name'] : 'User 2'}: ${participants.isNotEmpty ? avgtimesuser2.toStringAsFixed(2) : ''} minutes',
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Average Sentiment:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${participants.isNotEmpty ? participants[0]['name'] : 'User 1'}: ${participants.isNotEmpty ? avgSentimentUser1.toStringAsFixed(2) : ''}',
+                ),
+                Text(
+                  '${participants.isNotEmpty ? participants[1]['name'] : 'User 2'}: ${participants.isNotEmpty ? avgSentimentUser2.toStringAsFixed(2) : ''}',
                 ),
               ],
             ),
