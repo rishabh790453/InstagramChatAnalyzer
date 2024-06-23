@@ -1,7 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:sentiment_dart/sentiment_dart.dart';
 
 void main() {
@@ -65,24 +64,34 @@ class _MyHomePageState extends State<MyHomePage> {
       averageResponseTime = {};
     });
 
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['json'],
-    );
+    final input = html.FileUploadInputElement();
+    input.accept = '.json';
+    input.click();
 
-    if (result != null) {
-      String jsonContent = await File(result.files.single.path!).readAsString();
-      Map<String, dynamic> jsonData = jsonDecode(jsonContent);
+    input.onChange.listen((e) async {
+      final files = input.files;
+      if (files != null && files.isNotEmpty) {
+        final file = files.first;
+        final reader = html.FileReader();
+        reader.readAsText(file);
 
-      List<dynamic> processedMessages = _processMessages(jsonData['messages']);
+        reader.onLoadEnd.listen((e) {
+          final jsonContent = reader.result as String?;
+          if (jsonContent != null) {
+            final jsonData = jsonDecode(jsonContent);
 
-      setState(() {
-        participants = jsonData['participants'];
-        messages = processedMessages;
-        _calculateMessageCounts();
-        _calculateAverageSentiments();
-      });
-    }
+            List<dynamic> processedMessages = _processMessages(jsonData['messages']);
+
+            setState(() {
+              participants = jsonData['participants'];
+              messages = processedMessages;
+              _calculateMessageCounts();
+              _calculateAverageSentiments();
+            });
+          }
+        });
+      }
+    });
   }
 
   List<dynamic> _processMessages(List<dynamic> messages) {
@@ -171,11 +180,11 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     if (user1count > 0) {
-      avgSentimentUser1 = totalSentimentUser1 / 1;
+      avgSentimentUser1 = totalSentimentUser1 / user1count;
     }
 
     if (user2count > 0) {
-      avgSentimentUser2 = totalSentimentUser2 / 1;
+      avgSentimentUser2 = totalSentimentUser2 / user2count;
     }
   }
 
