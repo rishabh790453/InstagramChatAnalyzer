@@ -1,0 +1,16 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "git clone https://github.com/flutter/flutter.git --depth 1 -b stable .flutter-sdk ; ./.flutter-sdk/bin/flutter config --no-analytics ; ./.flutter-sdk/bin/flutter pub get",
+  "buildCommand": "./.flutter-sdk/bin/flutter build web --release --dart-define=API_BASE_URL=${API_BASE_URL:-http://localhost:4000}",
+  "outputDirectory": "build/web",
+  "routes": [
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}
