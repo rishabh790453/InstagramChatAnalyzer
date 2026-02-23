@@ -1,16 +1,74 @@
-# instajsonfiles
-Rishabh Gulecha Texas
-A new Flutter project.
+# Instagram Chat Analyzer (Full Stack)
 
-## Getting Started
+This project is now a full-stack app:
 
-This project is a starting point for a Flutter application.
+- Flutter frontend (`lib/main.dart`) for upload + dashboard UI
+- Node.js backend (`backend/`) with Express API
+- SQLite SQL database (`backend/data/analytics.db`) for saved analyses
 
-A few resources to get you started if this is your first Flutter project:
+It preserves the existing Instagram chat metrics:
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- message count per participant
+- average response time per participant
+- average sentiment per participant
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Architecture
+
+- Frontend uploads an Instagram chat JSON export file.
+- Backend analyzes the chat and stores result + raw conversation in SQLite.
+- Frontend shows analysis history and detailed metrics for each upload.
+
+## Prerequisites
+
+- Flutter SDK 3.22+
+- Node.js 18+
+
+## Run Backend
+
+```bash
+cd backend
+npm install
+npm run dev
+```
+
+Backend runs on `http://localhost:4000` by default.
+
+## Run Frontend
+
+From the repository root:
+
+```bash
+flutter pub get
+flutter run -d chrome --dart-define=API_BASE_URL=http://localhost:4000
+```
+
+You can also run on other Flutter targets.
+
+## API Endpoints
+
+- `GET /api/health`
+- `GET /api/analyses`
+- `GET /api/analyses/:id`
+- `POST /api/analyses`
+- `POST /api/non-followers`
+
+Example upload body:
+
+```json
+{
+	"fileName": "message_1.json",
+	"conversation": {
+		"participants": [{ "name": "User A" }, { "name": "User B" }],
+		"messages": []
+	}
+}
+```
+
+Example followers/following comparison body:
+
+```json
+{
+	"followers": { "relationships_followers": [] },
+	"following": { "relationships_following": [] }
+}
+```
