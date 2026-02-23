@@ -5,10 +5,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
-const String apiBaseUrl = String.fromEnvironment(
+const String _configuredApiBaseUrl = String.fromEnvironment(
   'API_BASE_URL',
-  defaultValue: 'http://localhost:4000',
+  defaultValue: '',
 );
+
+final String apiBaseUrl = _resolveApiBaseUrl();
+
+String _resolveApiBaseUrl() {
+  final configured = _configuredApiBaseUrl.trim();
+  if (configured.isNotEmpty) {
+    return _normalizeBaseUrl(configured);
+  }
+
+  final baseUri = Uri.base;
+  final host = baseUri.host.toLowerCase();
+  if (host == 'localhost' || host == '127.0.0.1') {
+    return 'http://localhost:4000';
+  }
+
+  if ((baseUri.scheme == 'http' || baseUri.scheme == 'https') && baseUri.host.isNotEmpty) {
+    return _normalizeBaseUrl('${baseUri.scheme}://${baseUri.authority}');
+  }
+
+  return 'http://localhost:4000';
+}
+
+String _normalizeBaseUrl(String value) {
+  return value.endsWith('/') ? value.substring(0, value.length - 1) : value;
+}
 
 void main() {
   runApp(const MyApp());
